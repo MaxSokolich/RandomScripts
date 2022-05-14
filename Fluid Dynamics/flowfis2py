@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Sep 30 09:43:24 2021
+
+@author: bizzaro
+"""
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.integrate import solve_ivp
+from matplotlib import animation
+
+'''
+scipy.integrate.solve_ivp(fun, t_span, y0, method='RK45', t_eval=None, 
+dense_output=False, events=None, vectorized=False, args=None, **options)
+
+
+t_span = integratoin bounds . t1 -> tf
+t_eval = how many points you want to evaluate (an array)
+
+'''
+
+
+#quiver
+X = np.linspace(0,5, 10)
+Y = np.linspace(0.5, 10)
+x,y = np.meshgrid(X, Y)
+
+u = x
+v = -y
+
+
+
+
+
+fig = plt.figure()
+ax = fig.gca()
+    
+
+
+
+
+
+
+
+
+'''
+
+x0=1
+y0=1
+t0=1 
+
+
+xdata = []
+ydata = []
+line, = ax2.plot(xdata, ydata)#, animated = True)
+
+
+
+
+def update_pathline(time):
+    
+	xdata.append(x0*np.exp(time-t0))
+	ydata.append(y0*np.exp((-1/2)*(time**2-t0**2)))
+	line.set_data(xdata, ydata)
+	return line,
+
+
+
+pathline_anim = animation.FuncAnimation(fig, update_pathline, frames= timespan,
+                     blit=True, interval = intervals,repeat=False)
+
+
+
+plt.show()
+
+'''
+
+
+
+'''
+
+#pathline
+"""
+dxp/dt = up(xp(t), t)
+
+xp(t0) = xp0
+"""
+
+def path(t,xyp0):
+    xp = xyp0[0]
+    yp = xyp0[1]
+    dypdt = xp
+    
+    dxpdt = -yp*t
+    return dypdt,dxpdt
+
+xyp0 = [1,1]
+tspan_p=[0,5]
+t_eval_p = np.linspace(0,5,200)
+
+sol_p = solve_ivp(path, tspan_p, xyp0, t_eval = t_eval_p)
+
+tp = sol_p.t
+xp = sol_p.y[0,:]
+yp= sol_p.y[1,:]
+
+plt.plot(xp,yp)
+plt.legend(('y(t)','x(t)'))
+plt.title('two first order ode')
+
+
+
+
+#streakline
+"""
+only difference between pathlines is how we evulate the constant of integration
+dxs/dt = up(xs(t), t)
+
+xs(t = tp) = xp0
+"""
+
+
+'''
+
+
+
+
+
+
+
+

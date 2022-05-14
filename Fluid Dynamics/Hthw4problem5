@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Mar  8 14:28:16 2020
+
+@author: bizzaro
+"""
+'''
+Compute and plot the temperature distribution 
+in the composite wall for selected values of q.
+What is the maximum allowable value of q? 
+q vs T
+'''
+
+import math as math
+import numpy as np
+import matplotlib.pyplot as plt
+#Define Knowns
+r1 = .008 #m
+r2 = .011 #m
+r3 = .014 #m
+
+Tinf = 600 #K
+h = 2000 #W/m^2K
+kt = 57 #W/mK
+kg = 3 #W/mK
+qdot = 100000000 #W/m^3
+Rtot = 0.01847 #K/W
+
+#begin
+
+qprime = qdot*math.pi*((r2**2)-(r1**2))
+T2 = qprime*Rtot+Tinf
+T1 = T2 + (((qdot*(r2**2))/(4*kt))*(1-(r1**2)/(r2**2)))- (((qdot*(r1**2))/(2*kt))*np.log(r2/r1))
+
+plt.figure()
+plt.plot(T1,qdot)
+plt.show()

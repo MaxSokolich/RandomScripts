@@ -1,0 +1,7 @@
+from sympy.solvers import solve
+from sympy import Symbol
+N = Symbol('N')
+h = Symbol('h')
+
+sol = solve(((2-N)*N)-2,N)
+print(sol)

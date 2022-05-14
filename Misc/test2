@@ -1,0 +1,54 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Mar  9 18:54:18 2020
+
+@author: bizzaro
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+q = 17807.08; q_dot = [1e+8]
+r1 = 0.008; r2 = 0.011; r3 = 0.014
+k1 = 57; k2 = 3
+Rt = 0.0184 # m*K/W
+Tinf = 600 # K
+area = np.pi*(r2**2 - r1**2)
+r_thorium = np.arange(r1,r2+0.001,0.001)
+r_graphite = np.arange(r2,r3+0.001,0.001)
+
+#
+
+def t_thorium(r, q_dot):
+    q = q_dot*area
+    T2 = q*Rt + Tinf
+    T1 = T2 + (q_dot*r2**2)/(4*k1) * (1-r1**2/r2**2) - (q_dot*r1**2)/(2*k1) * np.log(r2/r1)
+    temp = T2 + (q_dot/(4*k1))*(r2**2-r**2) + ( (q_dot/(4*k1))*(r2**2-r1**2) + (T2-T1) ) * np.log(r/r2)/np.log(r2/r1)
+    return temp
+#
+
+def t_graphite(r, q_dot):
+    q = q_dot*area
+    T2 = q*Rt + Tinf
+    T3 = T2 + (q_dot*r3**2)/(4*k2) * (1-r2**2/r3**2) - (q_dot*r2**2)/(2*k2) * np.log(r3/r2)
+    temp = T2 + (q_dot/(4*k2))*(r3**2-r**2) + ( (q_dot/(4*k2))*(r3**2-r2**2) + (T3-T2) ) * np.log(r/r3)/np.log(r3/r2)
+    temp = temp[::-1]
+    return temp
+#
+print(t_graphite(r_graphite,q_dot[0]))
+
+plt.plot(r_thorium,t_thorium(r_thorium, q_dot[0]), 'b-', label='1e+8')
+plt.legend()
+plt.xlabel('Radial Position in Thorium [m]')
+plt.ylabel('Temperature [K]')
+#plt.ylim(250,2500)
+plt.show()
+#
+plt.plot(r_graphite,t_graphite(r_graphite, q_dot[0]), 'b-', label='1e+8')
+plt.legend()
+plt.xlabel('Radial Position in Graphite [m]')
+plt.ylabel('Temperature [K]')
+#plt.ylim(250,2500)
+plt.show()
+#
