@@ -10,11 +10,11 @@ import numpy as np
 def Four_Digit_Sudoku_Combinations(DIGIT):
     combinations = []
     filtered_combinations = []
-    for a in range(1,7):
-        for b in range(1,7):
-            for c in range(1,7):
-                for d in range(1,7):
-                    print(a+b+c+d)
+    for a in range(1,10):
+        for b in range(1,10):
+            for c in range(1,10):
+                for d in range(1,10):
+    #                print(a+b+c+d)
                     if a+b+c+d == DIGIT and c!=a!=b!=c!=d!=b and a!=d:
                         test = list(np.sort([a,b,c,d]))    # add the new combination the list
                         combinations.append(test)

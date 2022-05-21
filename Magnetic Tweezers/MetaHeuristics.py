@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Created on Sat May 21 15:44:56 2022
+
+@author: bizzarohd
+"""
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
 Created on Sun Apr 10 12:41:23 2022
 
 @author: bizzarohd
@@ -8,8 +16,7 @@ Created on Sun Apr 10 12:41:23 2022
 
 import numpy as np
 import matplotlib.pyplot as plt
-np.random.seed(10)
-
+import matplotlib.animation as animation
 
 
 
@@ -21,17 +28,16 @@ define optimization problem which is being solved by PSO
 '''
 #Define Cost Function
 def CostFunction(X):
-    def sphere(X):
-        Z = sum(X**2)
-        return Z
-    return sphere(X)
+    Z = (X[0]-3.14)**2 + (X[1]-2.72)**2 + np.sin(3*X[0]+1.41) + np.sin(4*X[1]-1.73)
+    #Z = np.sin(X[0]) + np.cos(X[1])
+    return Z
 
-nVar = 2                           # the number of desicion or unknown variables (what is the dimension of our search space)
 
+
+nVar = 2                         # the number of desicion or unknown variables (what is the dimension of our search space)
 VarSize = np.zeros([nVar])       # any solution of our seach space is size 1 row and nvar columuns. so our solution are horizontal vecots
-
-VarMin = -10                        # lower bound of desicison variables, our 5 desicion variables are real numbers from -10 to 10
-VarMax = 10                         # upper bound of desision variables
+VarMin = -7                       # lower bound of desicison variables, our 5 desicion variables are real numbers from -10 to 10
+VarMax = 15                      # upper bound of desision variables
 
                                     # we are search for a value in this range that minimizes our cost function
 
@@ -42,13 +48,16 @@ VarMax = 10                         # upper bound of desision variables
 #Step 2:  Parameters of PSO
 #%%
 
-MaxIt = 10                         # how many times the PSO will iterate for
+MaxIt = 50                        # how many times the PSO will iterate for
 
-nPop = 5                         # population size or swarm size or number of particles in the swarm
+nPop = 20                     # population size or swarm size or number of particles in the swarm
 
 w = .8                               # interia Coefficent
 c1 = 0.1                              # Personal or Acceleration Coeffient
 c2 = 0.1                            # Social or Global Coefficent
+
+
+
 
 
 #%%
@@ -62,52 +71,68 @@ evaluate the particles and intizlize the values of personal best and global best
 
 #the particle template
 class Empty_Particle:
+    """Class for storing Particle varaibles , AKA
+    (Poistion= [x,y], velocity = [x,y], cost = C, Personal_Best_Pos = [x,y] , Personal_Best_Cost = C)
 
-    def __init__(self, Position, Velocity, Cost, Personal_Best_Pos, Personal_Best_Cost):
+    """
+
+    def __init__(self):
+        self.Position = 0
+        self.Velocity = 0
+        self.Cost = 0
+        self.Personal_Best_Pos = 0
+        self.Personal_Best_Cost = 0
+    
+    def set_position(self, Position):
         self.Position = Position
-        self.Velocity = Velocity
-        self.Cost = Cost
-        self.Personal_Best_Pos = Personal_Best_Pos
-        self.Personal_Best_Cost = Personal_Best_Cost
-        
-          
-#create population array
-p1 = Empty_Particle([], [], [], [], [])
-p2 = Empty_Particle([], [], [], [], [])
-p3 = Empty_Particle([], [], [], [], [])
-p4 = Empty_Particle([], [], [], [], [])
-p5 = Empty_Particle([], [], [], [], [])
 
-Particles = [p1,p2,p3,p4,p5]
+    def set_velocity(self, Velocity):
+        self.Velocity = Velocity
+
+    def set_cost(self, Cost):
+        self.Cost = Cost
+        
+    def set_Personal_Best_Pos(self, Personal_Best_Pos):
+        self.Personal_Best_Pos = Personal_Best_Pos
+        
+    def set_Personal_Best_Cost(self, Personal_Best_Cost):
+        self.Personal_Best_Cost = Personal_Best_Cost
+          
+        
+#create population array
+
 
 
 #Initilize Global Best (initlizlly it holds the worst value)
-GlobalBestCost = 1000
-BestCosts = np.zeros(MaxIt)
+GlobalBestCost = 100000
+GlobalBestPosition = 0
 
-# loop through particles and intilize/ define the intilial positions etc
-for i in Particles:
+
+
+
+
+
+
+# loop through empty particle template and intilize/ define the initial positions etc
+Particle_Array = []
+for i in range(nPop):
+    Particle = Empty_Particle()
     
-    i.Position = np.random.rand(2) * 5
-    i.Velocity = np.random.rand(2) * .01
+    Particle.set_position(np.random.uniform(VarMin, VarMax, nVar))
+    Particle.set_velocity(np.random.uniform(VarMin, VarMax, nVar)*.1)
+    Particle.set_cost(CostFunction(Particle.Position))
+    Particle.set_Personal_Best_Pos(Particle.Position)
+    Particle.set_Personal_Best_Cost(Particle.Cost)
     
+    Particle_Array.append(Particle)
+    print(Particle.Velocity)
+    #update personal and global bests based on these preliinary values
     
-    #Evaluate Particle
-    i.Cost = CostFunction(i.Position)
-  
-    #update the personal best for each particl
-    i.Personal_Best_Pos = i.Position
-    i.Personal_Best_Cost = i.Cost
-    
-    #particles = ax.scatter(i.Position[0], i.Position[1], color = 'k', alpha = 1,s = 100)
-    #velocities = ax.quiver(i.Position[0], i.Position[1],  i.Velocity[0],  i.Velocity[1], width = 0.005, scale_units = 'xy', scale = .01)
+    if Particle.Personal_Best_Cost < GlobalBestCost:
+        GlobalBestCost = Particle.Personal_Best_Cost
+        GlobalBestPosition = Particle.Personal_Best_Pos
     
 
-    
-    #Update Global Best (comapre personal best to global best)
-    if i.Personal_Best_Cost < GlobalBestCost:
-        GlobalBestCost = i.Personal_Best_Cost
-    
 
 #%%
 
@@ -117,44 +142,101 @@ for i in Particles:
 #%%
 
 
+BestCosts = []
+
+Total_Pos_List = []
+Total_Vel_List = []
 
 
 for it in range(MaxIt):
-    for i in Particles:
-     
-        BestCosts[it] = GlobalBestCost
-        Gobal_Best_Position = i.Position
-        print(BestCosts[it])
-        #new velocity value is:
+    BestCosts.append(GlobalBestCost)
+    print("Iterarton"+str(it))
+    print("      Global Best Cost = ", GlobalBestCost)
+    print("      Global Best Position = ", GlobalBestPosition)
+    
+    #Record positions from each generation and append to lsit
+    Pos_Generation_List = []
+    Total_Pos_List.append(Pos_Generation_List)
+    
+    #record velcoitys
+    Vel_Generation_List = []
+    Total_Vel_List.append(Vel_Generation_List)
+   
+   
+
+    for i in range(len(Particle_Array)):
+        
+        #Update Velocity
         r = np.random.rand(2)
+        Particle_Array[i].Velocity = w * Particle_Array[i].Velocity + (r[0] * c1 * (Particle_Array[i].Personal_Best_Pos - Particle_Array[i].Position)) + (r[1] * c2 * (GlobalBestPosition - Particle_Array[i].Position))
+        #Now move each particle based on new velocity
+        Particle_Array[i].Position = Particle_Array[i].Position + Particle_Array[i].Velocity
         
-        i.Velocity = w * i.Velocity + r[0] * c1 *(i.Personal_Best_Cost - i.Position) + c2* r[1] * (Gobal_Best_Position - i.Position)
-        i.Position = i.Position + i.Velocity
+        #Record individual positions
+        Pos_Generation_List.append(Particle_Array[i].Position)
+    
+        #Record individual velociuues
+        Vel_Generation_List.append(Particle_Array[i].Velocity)
+    
+       
+        #Update Cost
+        Particle_Array[i].Cost = CostFunction(Particle_Array[i].Position)
+        if Particle_Array[i].Cost < Particle_Array[i].Personal_Best_Cost:
+            Particle_Array[i].Personal_Best_Pos = Particle_Array[i].Position
+            Particle_Array[i].Personal_Best_Cost = Particle_Array[i].Cost
+            if Particle_Array[i].Personal_Best_Cost < GlobalBestCost:
+                GlobalBestCost = Particle_Array[i].Personal_Best_Cost
+                GlobalBestPosition = Particle_Array[i].Position
+       
         
-        i.Cost = CostFunction(i.Position)
-        if i.Cost < i.Personal_Best_Cost:
-            i.Personal_Best_Pos = i.Position
-            i.Personal_Best_Cost = i.Cost
-            if i.Personal_Best_Cost < GlobalBestCost:
-                GlobalBestCost = i.Personal_Best_Cost
-                Gobal_Best_Position = i.Position
-            
-        
-        fig, ax = plt.subplots(figsize = (13,10))
-        fig.set_tight_layout(True)
 
-        ax.set_xlim([0,5])
-        ax.set_ylim([0,5])
-        particles = ax.scatter(i.Position[0], i.Position[1], color = 'k', alpha = 1,s = 100)
-        
-#store the best cost value at every iteration 
-          
+Total_Pos_List = np.array(Total_Pos_List)
+Total_Vel_List = np.array(Total_Vel_List)
+
+
+#Step 5: Animate if 2D
+#%%
+
+
+#print(BestCosts)
+fig, ax = plt.subplots(figsize=(13,8))
+ax.set_xlim([VarMin,VarMax])
+ax.set_ylim([VarMin,VarMax])
+
+
+Pos_Plot = ax.scatter(Total_Pos_List[0,:,0],Total_Pos_List[0,:,1])
+Arrow_Plot = ax.quiver(Total_Pos_List[0,:,0],Total_Pos_List[0,:,1],Total_Vel_List[0,:,0],Total_Vel_List[0,:,1], width=0.005, angles='xy', scale_units='xy', scale=1)
+
+
+#Create contours
+x, y = np.array(np.meshgrid(np.linspace(VarMin,VarMax,200), np.linspace(VarMin,VarMax,200)))
+Z = CostFunction([x,y])
+Countor_Plot = ax.contour(x, y, Z, 10)
+Color_Plot = ax.imshow(Z, extent = [VarMin,VarMax,VarMin,VarMax])
+
+
+
+
+def animate(i):
+    title = 'Iteration {:02d}'.format(i)
+    ax.set_title(title)
+    data= np.array([Total_Pos_List[i,:,0],Total_Pos_List[i,:,1]])
+    Pos_Plot.set_offsets(data.T)
+    Arrow_Plot.set_offsets(data.T)
+    Arrow_Plot.set_UVC(Total_Vel_List[i,:,0], Total_Vel_List[i,:,1])
+    return ax,  Pos_Plot, Arrow_Plot
+   
+
+#plt.figure()
+#plt.plot(np.arange(0,MaxIt), BestCosts)
+
+
+ani = animation.FuncAnimation(fig, animate, frames=list(range(1,MaxIt)), interval=500, repeat = False)
+#Step 6: Results
 #%%
 
 
 
-#Step 5: Results
-#%%
 
 
 

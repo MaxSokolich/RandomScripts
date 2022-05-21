@@ -60,6 +60,7 @@ def update():
    
     gbest = personal_best[:, personal_best_obj.argmax()]
     gbest_obj = personal_best_obj.max()
+    print(gbest_obj)
     #print("X  =  ", X)
     #print("personal_best  =  ", personal_best)
     #print(gbest, gbest_obj,"\n\n")
